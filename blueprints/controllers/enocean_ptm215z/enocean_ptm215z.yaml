@@ -1,0 +1,133 @@
+# Blueprint metadata
+blueprint:
+  name: Controller - EnOcean PTM 215Z Green Power 2-Channel Switch
+  description: |
+    # Controller - EnOcean PTM 215Z Green Power 2-Channel Switch
+    
+    > TODO fill description
+  source_url: https://github.com/EPMatt/awesome-ha-blueprints/blob/main/blueprints/controllers/enocean_ptm215z/enocean_ptm215z.yaml
+  domain: automation
+  input:
+    controller_entity:
+      name: (Zigbee2MQTT) Controller Entity
+      description: The action sensor of the controller to use for the automation. Choose a value only if the remote is integrated with Zigbee2MQTT.
+      default: ''
+      selector:
+        entity:
+          domain: sensor
+    hold_delay:
+      name: Hold delay
+      description: If the button has been held more than the configured Hold delay, the corresponding held action is triggered.
+      default: 500
+      selector:
+        number:
+          min: 100.0
+          max: 1000.0
+          unit_of_measurement: milliseconds
+          mode: box
+          step: 10.0
+mode: single
+max_exceeded: silent
+trigger:
+  - platform: event
+    event_type: state_changed
+    event_data:
+      entity_id: !input 'controller_entity'
+condition: '{{ trigger.event.data.new_state.state not in ["","None"] }}'
+action:
+  - variables:
+      trigger_action: '{{ trigger.event.data.new_state.state }}'
+  - choose:
+      - conditions: '{{ "press_" | string in trigger_action }}'
+        sequence:
+          - wait_for_trigger:
+              - platform: state
+                entity_id: !input 'controller_entity'
+                to: "release_1"
+              - platform: state
+                entity_id: !input 'controller_entity'
+                to: "release_2"
+              - platform: state
+                entity_id: !input 'controller_entity'
+                to: "release_3"
+              - platform: state
+                entity_id: !input 'controller_entity'
+                to: "release_4"
+            timeout:
+              milliseconds: !input 'hold_delay'
+          - choose:
+              - conditions: '{{ trigger_action == "press_1" and wait.trigger != None }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: !input 'controller_entity'
+                      action: bottom_button_up_short
+              - conditions: '{{ trigger_action == "press_2" and wait.trigger != None }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: !input 'controller_entity'
+                      action: top_button_up_short
+              - conditions: '{{ trigger_action == "press_3" and wait.trigger != None }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: !input 'controller_entity'
+                      action: bottom_button_down_short
+              - conditions: '{{ trigger_action == "press_4" and wait.trigger != None }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: !input 'controller_entity'
+                      action: top_button_down_short
+              - conditions: '{{ trigger_action == "press_1" and wait.trigger == None }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: '{{ controller_id }}'
+                      action: bottom_button_up_long
+              - conditions: '{{ trigger_action == "press_2" and wait.trigger == None }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: '{{ controller_id }}'
+                      action: top_button_up_long
+              - conditions: '{{ trigger_action == "press_3" and wait.trigger == None }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: '{{ controller_id }}'
+                      action: bottom_button_down_long
+              - conditions: '{{ trigger_action == "press_4" and wait.trigger == None }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: '{{ controller_id }}'
+                      action: top_button_down_long
+      - conditions: '{{ "release_" | string in trigger_action }}'
+        sequence:
+          - choose:
+              - conditions: '{{ trigger_action == "release_1" }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: '{{ controller_id }}'
+                      action: bottom_button_up_release
+              - conditions: '{{ trigger_action == "release_2" }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: '{{ controller_id }}'
+                      action: top_button_up_release
+              - conditions: '{{ trigger_action == "release_3" }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: '{{ controller_id }}'
+                      action: bottom_button_down_release
+              - conditions: '{{ trigger_action == "release_4" }}'
+                sequence:
+                  - event: ahb_controller_event
+                    event_data:
+                      controller: '{{ controller_id }}'
+                      action: top_button_down_release

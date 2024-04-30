@@ -40,7 +40,9 @@ blueprint:
       default: ''
       selector:
         entity:
-          domain: sensor
+          domain:
+            - sensor
+            - input_text
     helper_last_controller_event:
       name: (Required) Helper - Last Controller Event
       description: Input Text used to store the last event fired by the controller. You will need to manually create a text input entity for this, please read the blueprint Additional Notes for more info.
@@ -357,8 +359,6 @@ action:
             default: !input action_button_up_long
       - conditions:
           - '{{ trigger_action | string in button_up_release }}'
-          # for integrations which need to store the last controller event, need to check the previous button event, stored in the provided input_text
-          - '{{ not integration_id in integrations_with_prev_event_storage or last_controller_event | string in button_up_long }}'
         sequence:
           # fire the event
           - event: ahb_controller_event
@@ -440,8 +440,6 @@ action:
             default: !input action_button_down_long
       - conditions:
           - '{{ trigger_action | string in button_down_release }}'
-          # for integrations which need to store the last controller event, need to check the previous button event, stored in the provided input_text
-          - '{{ not integration_id in integrations_with_prev_event_storage or last_controller_event | string in button_down_long }}'
         sequence:
           # fire the event
           - event: ahb_controller_event
