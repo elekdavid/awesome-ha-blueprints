@@ -26,6 +26,78 @@ blueprint:
           unit_of_measurement: milliseconds
           mode: box
           step: 10.0
+    button_1_pressed:
+      name: Button 1 Pressed
+      description: Action to run, when button 1 is pressed.
+      default: []
+      selector:
+        action: {}
+    button_1_held:
+      name: Button 1 Held
+      description: Action to run, when the button 1 is held.
+      default: []
+      selector:
+        action: {}
+    button_1_released:
+      name: Button 1 Released
+      description: Action to run, when the button 1 is released.
+      default: []
+      selector:
+        action: {}
+    button_2_pressed:
+      name: Button 2 Pressed
+      description: Action to run, when the button 2 pressed.
+      default: []
+      selector:
+        action: {}
+    button_2_held:
+      name: Button 2 Held
+      description: Action to run, when the button 2 is held.
+      default: []
+      selector:
+        action: {}
+    button_2_released:
+      name: Button 2 Released
+      description: Action to run, when the button 2 is released.
+      default: []
+      selector:
+        action: {}
+    button_3_pressed:
+      name: Button 3 Pressed
+      description: Action to run, when the button 3 is pressed.
+      default: []
+      selector:
+        action: {}
+    button_3_held:
+      name: Button 3 Held
+      description: Action to run, when the button 3 is held.
+      default: []
+      selector:
+        action: {}
+    button_3_released:
+      name: Button 3 Released
+      description: Action to run, when the button 3 is released.
+      default: []
+      selector:
+        action: {}
+    button_4_pressed:
+      name: Button 4 Pressed
+      description: Action to run, when the button 4 is pressed.
+      default: []
+      selector:
+        action: {}
+    button_4_held:
+      name: Button 4 Held
+      description: Action to run, when the button 4 is held.
+      default: []
+      selector:
+        action: {}
+    button_4_released:
+      name: Button 4 Released
+      description: Action to run, when the button 4 is released.
+      default: []
+      selector:
+        action: {}
 mode: single
 max_exceeded: silent
 trigger:
@@ -62,48 +134,72 @@ action:
                     event_data:
                       controller: !input 'controller_entity'
                       action: bottom_button_up_short
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_1_pressed'
               - conditions: '{{ trigger_action == "press_2" and wait.trigger != None }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: !input 'controller_entity'
                       action: top_button_up_short
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_2_pressed'
               - conditions: '{{ trigger_action == "press_3" and wait.trigger != None }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: !input 'controller_entity'
                       action: bottom_button_down_short
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_3_pressed'
               - conditions: '{{ trigger_action == "press_4" and wait.trigger != None }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: !input 'controller_entity'
                       action: top_button_down_short
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_4_pressed'
               - conditions: '{{ trigger_action == "press_1" and wait.trigger == None }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: '{{ controller_id }}'
                       action: bottom_button_up_long
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_1_held'
               - conditions: '{{ trigger_action == "press_2" and wait.trigger == None }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: '{{ controller_id }}'
                       action: top_button_up_long
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_2_held'
               - conditions: '{{ trigger_action == "press_3" and wait.trigger == None }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: '{{ controller_id }}'
                       action: bottom_button_down_long
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_3_held'
               - conditions: '{{ trigger_action == "press_4" and wait.trigger == None }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: '{{ controller_id }}'
                       action: top_button_down_long
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_4_held'
       - conditions: '{{ "release_" | string in trigger_action }}'
         sequence:
           - choose:
@@ -113,21 +209,33 @@ action:
                     event_data:
                       controller: '{{ controller_id }}'
                       action: bottom_button_up_release
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_1_released'
               - conditions: '{{ trigger_action == "release_2" }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: '{{ controller_id }}'
                       action: top_button_up_release
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_2_released'
               - conditions: '{{ trigger_action == "release_3" }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: '{{ controller_id }}'
                       action: bottom_button_down_release
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_2_released'
               - conditions: '{{ trigger_action == "release_4" }}'
                 sequence:
                   - event: ahb_controller_event
                     event_data:
                       controller: '{{ controller_id }}'
                       action: top_button_down_release
+                  - choose:
+                      - conditions: []
+                        sequence: !input 'button_4_released'
