@@ -152,6 +152,29 @@ blueprint:
           step: 1
           unit_of_measurement: brightness
           mode: slider
+    force_color_temperature:
+      name: (Optional) Force color temperature value at turn on
+      description: Force color temperature to the "On Kelvin" input value, when the light is being turned on.
+      default: false
+      selector:
+        boolean:
+    on_kelvin:
+      name: (Optional) On Kelvin
+      description: Kelvin value to force when turning on the light
+      default: 2202
+      selector:
+        number:
+          min: 2202
+          max: 4000
+          step: 1
+          unit_of_measurement: Kelvin
+          mode: slider
+    turn_on_with_off:
+      name: (Optional) Turn on with off
+      description: Turn on with minimum brightness when off and off button pressed
+      default: false
+      selector:
+        boolean:
     smooth_power_on:
       name: (Optional) Smooth power on
       description: Force the light to turn on at minimum brightness when a brightness up command (single or continuous) is triggered and light is off.
@@ -348,6 +371,9 @@ variables:
   brightness_steps_long: !input brightness_steps_long
   force_brightness: !input force_brightness
   on_brightness: !input on_brightness
+  force_color_temperature: !input force_color_temperature
+  on_kelvin: !input on_kelvin
+  turn_on_with_off: !input turn_on_with_off
   smooth_power_on: !input smooth_power_on
   smooth_power_off: !input smooth_power_off
   color_modes:
@@ -395,12 +421,27 @@ action:
       - conditions: '{{ action == turn_on }}'
         sequence:
           - choose:
-              - conditions: '{{ force_brightness }}'
+              - conditions: '{{ force_brightness and not force_color_temperature }}'
                 sequence:
                   - service: light.turn_on
                     entity_id: !input light
                     data:
                       brightness: !input on_brightness
+                      transition: '{{ light_transition / 1000 }}'
+              - conditions: '{{ not force_brightness and force_color_temperature }}'
+                sequence:
+                  - service: light.turn_on
+                    entity_id: !input light
+                    data:
+                      kelvin: !input on_kelvin
+                      transition: '{{ light_transition / 1000 }}'
+              - conditions: '{{ force_brightness and force_color_temperature }}'
+                sequence:
+                  - service: light.turn_on
+                    entity_id: !input light
+                    data:
+                      brightness: !input on_brightness
+                      kelvin: !input on_kelvin
                       transition: '{{ light_transition / 1000 }}'
             default:
               - service: light.turn_on
@@ -409,10 +450,19 @@ action:
                   transition: '{{ light_transition / 1000 }}'
       - conditions: '{{ action == turn_off }}'
         sequence:
-          - service: light.turn_off
-            entity_id: !input light
-            data:
-              transition: '{{ light_transition / 1000 }}'
+          - choose:
+             - conditions: '{{ turn_on_with_off }}'
+               sequence:
+                 - service: light.turn_on
+                   entity_id: !input light
+                   data:
+                     brightness: !input min_brightness
+                     transition: '{{ light_transition / 1000 }}'
+            default:
+              - service: light.turn_off
+                entity_id: !input light
+                data:
+                  transition: '{{ light_transition / 1000 }}'
       - conditions: '{{ action == brightness_up }}'
         sequence:
           - choose:
