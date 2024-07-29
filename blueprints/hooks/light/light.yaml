@@ -451,7 +451,7 @@ action:
       - conditions: '{{ action == turn_off }}'
         sequence:
           - choose:
-             - conditions: '{{ turn_on_with_off }}'
+             - conditions: '{{ turn_on_with_off and states(light) == "off" }}'
                sequence:
                  - service: light.turn_on
                    entity_id: !input light
