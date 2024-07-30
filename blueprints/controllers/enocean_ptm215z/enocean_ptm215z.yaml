@@ -133,7 +133,7 @@ action:
                   - event: ahb_controller_event
                     event_data:
                       controller: !input 'controller_entity'
-                      action: bottom_button_up_short
+                      action: top_button_up_short
                   - choose:
                       - conditions: []
                         sequence: !input 'button_1_pressed'
