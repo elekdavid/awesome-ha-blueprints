@@ -398,7 +398,7 @@ trigger:
     event_type: ahb_controller_event
     event_data:
       controller: !input controller_entity
-condition: []
+condition: [ ]
 action:
   - variables:
       action: '{{ trigger.event.data.action }}'
@@ -451,18 +451,29 @@ action:
       - conditions: '{{ action == turn_off }}'
         sequence:
           - choose:
-             - conditions: '{{ turn_on_with_off and states(light) == "off" }}'
-               sequence:
-                 - service: light.turn_on
-                   entity_id: !input light
-                   data:
-                     brightness: !input min_brightness
-                     transition: '{{ light_transition / 1000 }}'
-            default:
-              - service: light.turn_off
-                entity_id: !input light
-                data:
-                  transition: '{{ light_transition / 1000 }}'
+              - conditions: '{{ turn_on_with_off and states(light) == "off" }}'
+                sequence:
+                  - choose:
+                      - conditions: '{{ force_color_temperature }}'
+                        sequence:
+                          - service: light.turn_on
+                            entity_id: !input light
+                            data:
+                              kelvin: !input on_kelvin
+                              brightness: !input min_brightness
+                              transition: '{{ light_transition / 1000 }}'
+                    default:
+                      - service: light.turn_on
+                        entity_id: !input light
+                        data:
+                          brightness: !input min_brightness
+                          transition: '{{ light_transition / 1000 }}'
+              - conditions: '{{ states(light) == "on" }}'
+                sequence:
+                  - service: light.turn_off
+                    entity_id: !input light
+                    data:
+                      transition: '{{ light_transition / 1000 }}'
       - conditions: '{{ action == brightness_up }}'
         sequence:
           - choose:
