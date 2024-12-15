@@ -168,7 +168,7 @@ action:
                 sequence:
                   - event: ahb_controller_event
                     event_data:
-                      controller: '{{ controller_id }}'
+                      controller: !input 'controller_entity'
                       action: top_button_up_long
                   - choose:
                       - conditions: []
@@ -177,7 +177,7 @@ action:
                 sequence:
                   - event: ahb_controller_event
                     event_data:
-                      controller: '{{ controller_id }}'
+                      controller: !input 'controller_entity'
                       action: bottom_button_up_long
                   - choose:
                       - conditions: []
@@ -186,7 +186,7 @@ action:
                 sequence:
                   - event: ahb_controller_event
                     event_data:
-                      controller: '{{ controller_id }}'
+                      controller: !input 'controller_entity'
                       action: top_button_down_long
                   - choose:
                       - conditions: []
@@ -195,7 +195,7 @@ action:
                 sequence:
                   - event: ahb_controller_event
                     event_data:
-                      controller: '{{ controller_id }}'
+                      controller: !input 'controller_entity'
                       action: bottom_button_down_long
                   - choose:
                       - conditions: []
@@ -207,7 +207,7 @@ action:
                 sequence:
                   - event: ahb_controller_event
                     event_data:
-                      controller: '{{ controller_id }}'
+                      controller: !input 'controller_entity'
                       action: top_button_up_release
                   - choose:
                       - conditions: []
@@ -216,7 +216,7 @@ action:
                 sequence:
                   - event: ahb_controller_event
                     event_data:
-                      controller: '{{ controller_id }}'
+                      controller: !input 'controller_entity'
                       action: bottom_button_up_release
                   - choose:
                       - conditions: []
@@ -225,7 +225,7 @@ action:
                 sequence:
                   - event: ahb_controller_event
                     event_data:
-                      controller: '{{ controller_id }}'
+                      controller: !input 'controller_entity'
                       action: top_button_down_release
                   - choose:
                       - conditions: []
@@ -234,7 +234,7 @@ action:
                 sequence:
                   - event: ahb_controller_event
                     event_data:
-                      controller: '{{ controller_id }}'
+                      controller: !input 'controller_entity'
                       action: bottom_button_down_release
                   - choose:
                       - conditions: []
