@@ -433,7 +433,7 @@ action:
                   - service: light.turn_on
                     entity_id: !input light
                     data:
-                      kelvin: !input on_kelvin
+                      kelvin: '{{ on_kelvin | int }}'
                       transition: '{{ light_transition / 1000 }}'
               - conditions: '{{ force_brightness and force_color_temperature }}'
                 sequence:
@@ -441,7 +441,7 @@ action:
                     entity_id: !input light
                     data:
                       brightness: !input on_brightness
-                      kelvin: !input on_kelvin
+                      kelvin: '{{ on_kelvin | int }}'
                       transition: '{{ light_transition / 1000 }}'
             default:
               - service: light.turn_on
@@ -459,7 +459,7 @@ action:
                           - service: light.turn_on
                             entity_id: !input light
                             data:
-                              kelvin: !input on_kelvin
+                              kelvin: '{{ on_kelvin | int }}'
                               brightness: !input min_brightness
                               transition: '{{ light_transition / 1000 }}'
                     default:
