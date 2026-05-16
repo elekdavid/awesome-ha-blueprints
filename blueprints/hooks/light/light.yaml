@@ -40,6 +40,8 @@ blueprint:
         select:
           options:
             - IKEA E1524/E1810 TRÅDFRI Wireless 5-Button Remote
+            - EnOcean PTM 215Z Green Power 2-Channel Switch (Top)
+            - EnOcean PTM 215Z Green Power 2-Channel Switch (Bottom)
             - IKEA E1743 TRÅDFRI On/Off Switch & Dimmer
             - IKEA E1743 TRÅDFRI On/Off Switch & Dimmer (#2)
             - IKEA E1744 SYMFONISK Rotary Remote
@@ -150,6 +152,29 @@ blueprint:
           step: 1
           unit_of_measurement: brightness
           mode: slider
+    force_color_temperature:
+      name: (Optional) Force color temperature value at turn on
+      description: Force color temperature to the "On Kelvin" input value, when the light is being turned on.
+      default: false
+      selector:
+        boolean:
+    on_kelvin:
+      name: (Optional) On Kelvin
+      description: Kelvin value to force when turning on the light
+      default: 2202
+      selector:
+        number:
+          min: 2202
+          max: 4000
+          step: 1
+          unit_of_measurement: Kelvin
+          mode: slider
+    turn_on_with_off:
+      name: (Optional) Turn on with off
+      description: Turn on with minimum brightness when off and off button pressed
+      default: false
+      selector:
+        boolean:
     smooth_power_on:
       name: (Optional) Smooth power on
       description: Force the light to turn on at minimum brightness when a brightness up command (single or continuous) is triggered and light is off.
@@ -178,6 +203,20 @@ variables:
       color_up: button_right_short
       color_up_repeat: button_right_long
       toggle: button_center_short
+    EnOcean PTM 215Z Green Power 2-Channel Switch (Top):
+      turn_on: top_button_up_short
+      brightness_up_repeat: top_button_up_long
+      color_up: top_button_up_double
+      turn_off: top_button_down_short
+      brightness_down_repeat: top_button_down_long
+      color_down: top_button_down_double
+    EnOcean PTM 215Z Green Power 2-Channel Switch (Bottom):
+      turn_on: bottom_button_up_short
+      brightness_up_repeat: bottom_button_up_long
+      color_up: bottom_button_up_double
+      turn_off: bottom_button_down_short
+      brightness_down_repeat: bottom_button_down_long
+      color_down: bottom_button_down_double
     IKEA E1743 TRÅDFRI On/Off Switch & Dimmer:
       turn_on: button_up_short
       brightness_up_repeat: button_up_long
@@ -332,6 +371,9 @@ variables:
   brightness_steps_long: !input brightness_steps_long
   force_brightness: !input force_brightness
   on_brightness: !input on_brightness
+  force_color_temperature: !input force_color_temperature
+  on_kelvin: !input on_kelvin
+  turn_on_with_off: !input turn_on_with_off
   smooth_power_on: !input smooth_power_on
   smooth_power_off: !input smooth_power_off
   color_modes:
@@ -356,7 +398,7 @@ trigger:
     event_type: ahb_controller_event
     event_data:
       controller: !input controller_entity
-condition: []
+condition: [ ]
 action:
   - variables:
       action: '{{ trigger.event.data.action }}'
@@ -379,12 +421,27 @@ action:
       - conditions: '{{ action == turn_on }}'
         sequence:
           - choose:
-              - conditions: '{{ force_brightness }}'
+              - conditions: '{{ force_brightness and not force_color_temperature }}'
                 sequence:
                   - service: light.turn_on
                     entity_id: !input light
                     data:
                       brightness: !input on_brightness
+                      transition: '{{ light_transition / 1000 }}'
+              - conditions: '{{ not force_brightness and force_color_temperature }}'
+                sequence:
+                  - service: light.turn_on
+                    entity_id: !input light
+                    data:
+                      color_temp_kelvin: '{{ on_kelvin | int }}'
+                      transition: '{{ light_transition / 1000 }}'
+              - conditions: '{{ force_brightness and force_color_temperature }}'
+                sequence:
+                  - service: light.turn_on
+                    entity_id: !input light
+                    data:
+                      brightness: !input on_brightness
+                      color_temp_kelvin: '{{ on_kelvin | int }}'
                       transition: '{{ light_transition / 1000 }}'
             default:
               - service: light.turn_on
@@ -393,10 +450,30 @@ action:
                   transition: '{{ light_transition / 1000 }}'
       - conditions: '{{ action == turn_off }}'
         sequence:
-          - service: light.turn_off
-            entity_id: !input light
-            data:
-              transition: '{{ light_transition / 1000 }}'
+          - choose:
+              - conditions: '{{ turn_on_with_off and states(light) == "off" }}'
+                sequence:
+                  - choose:
+                      - conditions: '{{ force_color_temperature }}'
+                        sequence:
+                          - service: light.turn_on
+                            entity_id: !input light
+                            data:
+                              color_temp_kelvin: '{{ on_kelvin | int }}'
+                              brightness: !input min_brightness
+                              transition: '{{ light_transition / 1000 }}'
+                    default:
+                      - service: light.turn_on
+                        entity_id: !input light
+                        data:
+                          brightness: !input min_brightness
+                          transition: '{{ light_transition / 1000 }}'
+              - conditions: '{{ states(light) == "on" }}'
+                sequence:
+                  - service: light.turn_off
+                    entity_id: !input light
+                    data:
+                      transition: '{{ light_transition / 1000 }}'
       - conditions: '{{ action == brightness_up }}'
         sequence:
           - choose:
